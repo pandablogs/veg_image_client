@@ -5,7 +5,11 @@ export default {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundImage: {
+        'image': "url('https://img.freepik.com/premium-photo/light-effects-backgrounds-electronics-futuristic_53876-232997.jpg')",
+      }
+    },
   },
   plugins: [],
 }
