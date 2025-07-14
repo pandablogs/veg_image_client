@@ -12,7 +12,6 @@ function App() {
   }
 
   const [image, setImage] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
 
   const MealType = [
     { name: 'Breakfast' },
@@ -39,7 +38,6 @@ function App() {
     // if (file) setImage(URL.createObjectURL(file));
 
 
-
     // const file = e.target.files[0];
     // if (file) {
     //   const reader = new FileReader();
@@ -52,11 +50,10 @@ function App() {
     // }
 
 
-
     const file = e.target.files[0];
     if (file) {
-      setImage(file); // 👈 This is KEY: send raw file
-      setPreviewUrl(URL.createObjectURL(file)); // optional preview
+      setImage(URL.createObjectURL(file));
+      setFieldValue('image', file);
     }
 
   };
@@ -65,12 +62,15 @@ function App() {
     console.log('values', values)
     const formData = new FormData();
 
-    formData.append('image', image);
-    const response = await fetch('http://localhost:1000/api/upload', {
+    formData.append('image', values.image);
+    formData.append('mealType', values.mealType?.name);
+    formData.append('taste', values.taste?.name);
+    formData.append('cookingTime', values.cookingTime?.name);
+    const response = await fetch('http://localhost:1000/api/images/upload', {
       method: 'POST',
       body: formData,
     });
-
+    console.log('response', response)
     const data = await response.json();
 
     console.log('data', data)
@@ -90,8 +90,8 @@ function App() {
                 <div className="flex flex-col w-full max-w-5xl overflow-hidden bg-white shadow-2xl rounded-2xl md:flex-row">
                   {/* Left Form Side */}
                   <div className="flex flex-col justify-center w-full px-14 py-5 md:px-24 md:py-10 md:w-[65%]">
-                    <h1 className="mb-3 text-4xl font-extrabold text-center text-gray-900 md:text-6xl ">Find Your Happy Place</h1>
-                    <p className="my-6 text-base text-center text-gray-600 md:text-lg">Clear your mind with our daily online classes</p>
+                    <h1 className="mb-3 text-4xl font-extrabold text-center text-gray-900 md:text-6xl ">Find Your Perfect Recipe</h1>
+                    <p className="my-6 text-base text-center text-gray-600 md:text-lg">Clear your mind with our daily recipes</p>
                     {/* 
               <select className="w-full px-4 py-5 mb-6 bg-gray-100 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400" >
                 <option value="" disabled>Select Meal Type</option>
