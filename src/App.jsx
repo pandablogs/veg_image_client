@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Dropdown } from 'primereact/dropdown';
 import { Form, Formik } from "formik";
+import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 function App() {
 
@@ -10,7 +12,8 @@ function App() {
     cookingTime: '',
     image: null
   }
-
+  const [detectedVegetable, setDetectedVegetable] = useState('');
+  const navigate = useNavigate();
   const [image, setImage] = useState(null);
 
   const MealType = [
@@ -37,7 +40,6 @@ function App() {
     // const file = e.target.files[0];
     // if (file) setImage(URL.createObjectURL(file));
 
-
     // const file = e.target.files[0];
     // if (file) {
     //   const reader = new FileReader();
@@ -49,31 +51,41 @@ function App() {
     //   reader.readAsDataURL(file);
     // }
 
-
     const file = e.target.files[0];
     if (file) {
       setImage(URL.createObjectURL(file));
       setFieldValue('image', file);
     }
-
   };
 
   const onSubmitAction = async (values) => {
-    console.log('values', values)
-    const formData = new FormData();
+    try {
+      const formData = new FormData();
+      formData.append('image', values.image || '');
+      formData.append('mealType', values.mealType?.name || '');
+      formData.append('taste', values.taste?.name || '');
+      formData.append('cookingTime', values.cookingTime?.name || '');
+      const response = await fetch('http://localhost:1000/api/images/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      console.log('response', response)
+      const data = await response.json();
+      console.log('data', data);
 
-    formData.append('image', values.image);
-    formData.append('mealType', values.mealType?.name);
-    formData.append('taste', values.taste?.name);
-    formData.append('cookingTime', values.cookingTime?.name);
-    const response = await fetch('http://localhost:1000/api/images/upload', {
-      method: 'POST',
-      body: formData,
-    });
-    console.log('response', response)
-    const data = await response.json();
-
-    console.log('data', data)
+      if (data?.data?.vegetableName) {
+        setDetectedVegetable(data.data.vegetableName);
+      } else {
+        setDetectedVegetable('Unknown');
+      }
+      // if (data?.isSuceess) {
+      //   navigate('/recipe-list');
+      //   toast.success('Saved Successfully.', data?.message)
+      // }
+      console.log('data', data)
+    } catch (error) {
+      console.log('error', error)
+    }
   }
 
   return (
@@ -125,11 +137,19 @@ function App() {
                   <div className="flex items-center justify-center w-full p-6 md:w-[35%] bg-gray-50 md:p-10">
                     <div className="text-center">
                       {image ? (
-                        <img
-                          src={image}
-                          alt="Uploaded"
-                          className="h-[360px] w-auto object-cover rounded-xl shadow-lg"
-                        />
+                        <>
+                          <img
+                            src={image}
+                            alt="Uploaded"
+                            className="h-[360px] w-auto object-cover rounded-xl shadow-lg"
+                          />
+                          {detectedVegetable && (
+                            <p className="mt-2 text-xl font-bold text-green-700">
+                              Detected: {detectedVegetable}
+                            </p>
+                          )}
+                        </>
+
                       ) : (
                         <label className="block cursor-pointer">
                           <div className="h-[300px] w-[240px] border-2 border-dashed border-gray-400 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100">
